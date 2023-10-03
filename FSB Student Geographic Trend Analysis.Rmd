@@ -33,21 +33,41 @@ The product and service this analysis will provide is a soundbite on the geograp
 
 # Business Value Proposition
 
-![](images/BVP.png)
+![](BVP v2.png)
 
 # Data Sources
 
-The data file provided is from graduated students who completed thsi survey from 2019-2021.
+The data file provided is from graduated students who completed this survey from 2019-2021.
 
 ## Read in the data
 
 ```{r}
 data=readRDS(file = "FSB_BI_Survey_2019_2021.rds")
+options(scipen = 999)
 ```
 
 # Data Preprocessing
 
-Describing each data preprocessing step with small chunks of code, output where necessary, and documentation
+## Cleaning the Data
+
+```{r}
+# Removing those who are "seeking continuing education", "continuing education", "not seeking employment", NA
+
+ColumnsToRemove = c("seeking continuing education", "continuing education", "not seeking employment", "NA")
+
+data_filtered <- data %>%
+  filter(data$survey_plans != ColumnsToRemove)
+
+unique(data_filtered$survey_plans)
+```
+Remove unnecessary columns
+
+Fix text issues (OH=ohio=oh=Ohio)
+
+Look at missing (drop row if needed)
+
+Look at outliers (drop row if needed)
+
 
 # The rest of your document
 
