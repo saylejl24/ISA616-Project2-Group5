@@ -2902,6 +2902,7 @@ survey from 2019-2021.</p>
 <div id="read-in-the-data" class="section level2" number="3.1">
 <h2><span class="header-section-number">3.1</span> Read in the data</h2>
 <pre class="r"><code>data=readRDS(file = &quot;FSB_BI_Survey_2019_2021.rds&quot;)
+
 options(scipen = 999)</code></pre>
 </div>
 </div>
@@ -2912,21 +2913,160 @@ options(scipen = 999)</code></pre>
 Data</h2>
 <pre class="r"><code># Removing those who are &quot;seeking continuing education&quot;, &quot;continuing education&quot;, &quot;not seeking employment&quot;, NA
 
-ColumnsToRemove = c(&quot;seeking continuing education&quot;, &quot;continuing education&quot;, &quot;not seeking employment&quot;, &quot;NA&quot;)
+ValueToRemove = c(&quot;seeking continuing education&quot;, &quot;continuing education&quot;, &quot;not seeking employment&quot;, &quot;NA&quot;)
 
-data_filtered &lt;- data %&gt;%
-  filter(data$survey_plans != ColumnsToRemove)
+data_filtered &lt;- data[!(data$survey_plans %in% ValueToRemove), ]
 
 unique(data_filtered$survey_plans)</code></pre>
-<pre><code>## [1] &quot;accepted fulltime job&quot;        &quot;seeking employment&quot;          
-## [3] &quot;continuing education&quot;         &quot;other&quot;                       
-## [5] &quot;accepted parttime job&quot;        &quot;seeking continuing education&quot;
-## [7] &quot;military service&quot;             &quot;not seeking employment&quot;      
-## [9] &quot;self employed&quot;</code></pre>
+<pre><code>## [1] &quot;accepted fulltime job&quot; NA                      &quot;seeking employment&quot;   
+## [4] &quot;other&quot;                 &quot;accepted parttime job&quot; &quot;military service&quot;     
+## [7] &quot;self employed&quot;</code></pre>
 <p>Remove unnecessary columns</p>
-<p>Fix text issues (OH=ohio=oh=Ohio)</p>
+<pre class="r"><code># Remove the specified columns by their column numbers
+data_filtered2 &lt;- data_filtered[, c(2,3,22,23,25,27,28,29,37,38,39,40,41,42)]
+head(data_filtered2)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["major1"],"name":[1],"type":["fct"],"align":["left"]},{"label":["major2"],"name":[2],"type":["fct"],"align":["left"]},{"label":["Gender"],"name":[3],"type":["chr"],"align":["left"]},{"label":["GPA.Range"],"name":[4],"type":["chr"],"align":["left"]},{"label":["year.x"],"name":[5],"type":["chr"],"align":["left"]},{"label":["survey_city"],"name":[6],"type":["chr"],"align":["left"]},{"label":["survey_company"],"name":[7],"type":["chr"],"align":["left"]},{"label":["survey_deptfunc"],"name":[8],"type":["chr"],"align":["left"]},{"label":["survey_offers"],"name":[9],"type":["chr"],"align":["left"]},{"label":["survey_plans"],"name":[10],"type":["chr"],"align":["left"]},{"label":["survey_pref_field"],"name":[11],"type":["chr"],"align":["left"]},{"label":["survey_pref_loc"],"name":[12],"type":["chr"],"align":["left"]},{"label":["survey_salary"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["survey_state"],"name":[14],"type":["chr"],"align":["left"]}],"data":[{"1":"Finance","2":"none","3":"Male","4":"3.00 - 3.49","5":"2019","6":"Toledo","7":"BAM Nutual","8":"Finance","9":"0","10":"accepted fulltime job","11":"Yes","12":"Yes","13":"NA","14":"Ohio","_rn_":"2"},{"1":"Marketing","2":"none","3":"Female","4":"3.50 - 4.00","5":"2021","6":"Columbus","7":"CoHatch","8":"General Management","9":"1","10":"accepted fulltime job","11":"Yes","12":"Yes","13":"40000","14":"OH","_rn_":"3"},{"1":"Finance","2":"none","3":"Male","4":"3.00 - 3.49","5":"2020","6":"NA","7":"PwC","8":"NA","9":"NA","10":"accepted fulltime job","11":"NA","12":"NA","13":"NA","14":"NA","_rn_":"4"},{"1":"Marketing","2":"none","3":"Male","4":"3.00 - 3.49","5":"2019","6":"Columbus","7":"Abercrombie & Fitch","8":"General Management","9":"1","10":"accepted fulltime job","11":"Yes","12":"Yes","13":"63500","14":"Ohio","_rn_":"5"},{"1":"Marketing","2":"none","3":"Female","4":"3.00 - 3.49","5":"2020","6":"Cleveland","7":"McDonald's","8":"Consulting Marketing / Sales Operations / Procurement","9":"4","10":"accepted fulltime job","11":"Yes","12":"Yes","13":"68000","14":"OH","_rn_":"6"},{"1":"Finance","2":"none","3":"Female","4":"3.50 - 4.00","5":"2019","6":"Chicago","7":"Ernst & Young","8":"Analytics\\r\\n Consulting","9":"1","10":"accepted fulltime job","11":"Yes","12":"Yes","13":"58000","14":"Ohio / USA","_rn_":"7"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 <p>Look at missing (drop row if needed)</p>
-<p>Look at outliers (drop row if needed)</p>
+<pre class="r"><code>colSums(is.na(data_filtered2))</code></pre>
+<pre><code>##            major1            major2            Gender         GPA.Range 
+##                 0                 0                 0                 0 
+##            year.x       survey_city    survey_company   survey_deptfunc 
+##                 0              1078               997              1494 
+##     survey_offers      survey_plans survey_pref_field   survey_pref_loc 
+##               942               579              1314              1383 
+##     survey_salary      survey_state 
+##              1251              1062</code></pre>
+<p>Omit NA values in survey_plans</p>
+<pre class="r"><code>filtered &lt;- subset(data_filtered2, !is.na(survey_plans))
+colSums(is.na(filtered))</code></pre>
+<pre><code>##            major1            major2            Gender         GPA.Range 
+##                 0                 0                 0                 0 
+##            year.x       survey_city    survey_company   survey_deptfunc 
+##                 0               499               418               915 
+##     survey_offers      survey_plans survey_pref_field   survey_pref_loc 
+##               363                 0               735               804 
+##     survey_salary      survey_state 
+##               672               483</code></pre>
+<p>Fix text issues in State</p>
+<pre class="r"><code>filtered$survey_state &lt;- tolower(filtered$survey_state) # to lower case
+filtered$survey_state &lt;- gsub(&quot;[^a-zA-Z]&quot;, &quot;&quot;, filtered$survey_state) # remove abbreviations
+filtered$survey_state &lt;- match(filtered$survey_state, tolower(state.abb)) # convert to numerical representations
+filtered$survey_state &lt;- state.name[(filtered$survey_state)]
+print(unique(filtered$survey_state))</code></pre>
+<pre><code>##  [1] NA               &quot;Ohio&quot;           &quot;New York&quot;       &quot;Georgia&quot;       
+##  [5] &quot;Illinois&quot;       &quot;California&quot;     &quot;Kansas&quot;         &quot;Minnesota&quot;     
+##  [9] &quot;North Carolina&quot; &quot;Kentucky&quot;       &quot;Texas&quot;          &quot;Nevada&quot;        
+## [13] &quot;Indiana&quot;        &quot;Wisconsin&quot;      &quot;Massachusetts&quot;  &quot;Colorado&quot;      
+## [17] &quot;Washington&quot;     &quot;New Jersey&quot;     &quot;Utah&quot;           &quot;Missouri&quot;      
+## [21] &quot;Michigan&quot;       &quot;Iowa&quot;           &quot;Pennsylvania&quot;   &quot;Virginia&quot;      
+## [25] &quot;Rhode Island&quot;   &quot;Arizona&quot;        &quot;Maine&quot;          &quot;Connecticut&quot;   
+## [29] &quot;Maryland&quot;       &quot;Tennessee&quot;      &quot;Arkansas&quot;       &quot;Florida&quot;       
+## [33] &quot;Mississippi&quot;    &quot;Louisiana&quot;      &quot;South Carolina&quot; &quot;New Hampshire&quot; 
+## [37] &quot;Nebraska&quot;</code></pre>
+<p>Fix text issues in City</p>
+<pre class="r"><code>filtered$survey_city &lt;- tolower(filtered$survey_city) # to lower case
+filtered$survey_city &lt;- gsub(&quot;[^a-zA-Z]&quot;, &quot;&quot;, filtered$survey_city) # remove abbreviations
+filtered$survey_city &lt;- gsub(&quot;\\s+&quot;, &quot;&quot;, filtered$survey_city) # remove extra spaces
+filtered$survey_city &lt;- gsub(&quot; city$&quot;, &#39;&#39; ,  filtered$survey_city) # remove string city on the end 
+
+print(sort(unique(filtered$survey_city)))</code></pre>
+<pre><code>##   [1] &quot;addison&quot;             &quot;akron&quot;               &quot;albany&quot;             
+##   [4] &quot;alexandria&quot;          &quot;alpharetta&quot;          &quot;annapolis&quot;          
+##   [7] &quot;annarbor&quot;            &quot;arlington&quot;           &quot;atlanta&quot;            
+##  [10] &quot;auburn&quot;              &quot;august&quot;              &quot;augusta&quot;            
+##  [13] &quot;aurora&quot;              &quot;austin&quot;              &quot;avonlake&quot;           
+##  [16] &quot;baltimore&quot;           &quot;batesville&quot;          &quot;beachwood&quot;          
+##  [19] &quot;beavercreek&quot;         &quot;bellevue&quot;            &quot;beloit&quot;             
+##  [22] &quot;bengaluru&quot;           &quot;bentonville&quot;         &quot;billings&quot;           
+##  [25] &quot;biloxi&quot;              &quot;birmingham&quot;          &quot;blacklick&quot;          
+##  [28] &quot;blueash&quot;             &quot;bocaraton&quot;           &quot;boston&quot;             
+##  [31] &quot;brooklyn&quot;            &quot;brooklynheights&quot;     &quot;bucyrus&quot;            
+##  [34] &quot;buffalo&quot;             &quot;buffalogrove&quot;        &quot;burlington&quot;         
+##  [37] &quot;camas&quot;               &quot;cambridge&quot;           &quot;canton&quot;             
+##  [40] &quot;carmel&quot;              &quot;chagrinfalls&quot;        &quot;chandler&quot;           
+##  [43] &quot;chardon&quot;             &quot;charleston&quot;          &quot;charlotte&quot;          
+##  [46] &quot;charlottesville&quot;     &quot;chesterfield&quot;        &quot;chicago&quot;            
+##  [49] &quot;cincinatti&quot;          &quot;cincinnati&quot;          &quot;cincinnatioh&quot;       
+##  [52] &quot;cincinnnati&quot;         &quot;cleveland&quot;           &quot;coloradosprings&quot;    
+##  [55] &quot;colubmus&quot;            &quot;columbus&quot;            &quot;cornelius&quot;          
+##  [58] &quot;covington&quot;           &quot;dallas&quot;              &quot;dayton&quot;             
+##  [61] &quot;deerfield&quot;           &quot;denver&quot;              &quot;desmoines&quot;          
+##  [64] &quot;detroit&quot;             &quot;dontknowyet&quot;         &quot;dover&quot;              
+##  [67] &quot;downersgrove&quot;        &quot;dublin&quot;              &quot;durham&quot;             
+##  [70] &quot;eastlansing&quot;         &quot;eatontown&quot;           &quot;eauclaire&quot;          
+##  [73] &quot;edenprairie&quot;         &quot;edinburgh&quot;           &quot;elkhart&quot;            
+##  [76] &quot;enon&quot;                &quot;erlanger&quot;            &quot;evanston&quot;           
+##  [79] &quot;fairfield&quot;           &quot;falmouth&quot;            &quot;farhills&quot;           
+##  [82] &quot;farmingdale&quot;         &quot;findlaytentative&quot;    &quot;findley&quot;            
+##  [85] &quot;forthworth&quot;          &quot;fortlauderdale&quot;      &quot;fortlee&quot;            
+##  [88] &quot;fortmyers&quot;           &quot;fortworth&quot;           &quot;framingham&quot;         
+##  [91] &quot;franklin&quot;            &quot;ftmyers&quot;             &quot;grandblanc&quot;         
+##  [94] &quot;grandrapids&quot;         &quot;grantville&quot;          &quot;greenfield&quot;         
+##  [97] &quot;greensboro&quot;          &quot;greensburg&quot;          &quot;hamiliton&quot;          
+## [100] &quot;hamilton&quot;            &quot;hangzhou&quot;            &quot;harrisburg&quot;         
+## [103] &quot;hartford&quot;            &quot;hebron&quot;              &quot;herndon&quot;            
+## [106] &quot;hershey&quot;             &quot;hilliard&quot;            &quot;houston&quot;            
+## [109] &quot;howell&quot;              &quot;hudson&quot;              &quot;huntvalley&quot;         
+## [112] &quot;indiana&quot;             &quot;indianapolis&quot;        &quot;indianpolis&quot;        
+## [115] &quot;irvine&quot;              &quot;irving&quot;              &quot;istanbul&quot;           
+## [118] &quot;itasca&quot;              &quot;jacksonville&quot;        &quot;jerseycity&quot;         
+## [121] &quot;kalamazoo&quot;           &quot;kansascity&quot;          &quot;kent&quot;               
+## [124] &quot;kettering&quot;           &quot;keywest&quot;             &quot;knoxville&quot;          
+## [127] &quot;lakebuenavista&quot;      &quot;lakeforest&quot;          &quot;lakemary&quot;           
+## [130] &quot;lasvegas&quot;            &quot;lexington&quot;           &quot;libertyvalley&quot;      
+## [133] &quot;lima&quot;                &quot;lincolnshire&quot;        &quot;lisle&quot;              
+## [136] &quot;littlerock&quot;          &quot;losangeles&quot;          &quot;louisville&quot;         
+## [139] &quot;loveland&quot;            &quot;maclean&quot;             &quot;madison&quot;            
+## [142] &quot;maineville&quot;          &quot;manhattan&quot;           &quot;mansfield&quot;          
+## [145] &quot;marietta&quot;            &quot;marylandheights&quot;     &quot;marysville&quot;         
+## [148] &quot;mason&quot;               &quot;mayfield&quot;            &quot;mayfieldheights&quot;    
+## [151] &quot;mclean&quot;              &quot;memphis&quot;             &quot;mentor&quot;             
+## [154] &quot;miami&quot;               &quot;miamisburg&quot;          &quot;middletown&quot;         
+## [157] &quot;millington&quot;          &quot;milwaukee&quot;           &quot;milwaukwee&quot;         
+## [160] &quot;minneapolis&quot;         &quot;modesto&quot;             &quot;mthealthy&quot;          
+## [163] &quot;na&quot;                  &quot;naperville&quot;          &quot;nashville&quot;          
+## [166] &quot;newalbany&quot;           &quot;neworleans&quot;          &quot;newport&quot;            
+## [169] &quot;newville&quot;            &quot;newyork&quot;             &quot;newyorkcity&quot;        
+## [172] &quot;northbrook&quot;          &quot;northcantonohio&quot;     &quot;northfield&quot;         
+## [175] &quot;northrandall&quot;        &quot;norwalk&quot;             &quot;novelty&quot;            
+## [178] &quot;nyc&quot;                 &quot;oakbrook&quot;            &quot;oakbrookterrace&quot;    
+## [181] &quot;oakdale&quot;             &quot;oakland&quot;             &quot;omaha&quot;              
+## [184] &quot;orlando&quot;             &quot;orrville&quot;            &quot;oxford&quot;             
+## [187] &quot;paloalto&quot;            &quot;pawtucket&quot;           &quot;peoria&quot;             
+## [190] &quot;philadelphia&quot;        &quot;philadephia&quot;         &quot;phoenix&quot;            
+## [193] &quot;phoneix&quot;             &quot;pittsburgh&quot;          &quot;placencia&quot;          
+## [196] &quot;plano&quot;               &quot;plymouth&quot;            &quot;podgorica&quot;          
+## [199] &quot;portland&quot;            &quot;portsmouth&quot;          &quot;providence&quot;         
+## [202] &quot;qingdao&quot;             &quot;raleigh&quot;             &quot;ranchocucamunga&quot;    
+## [205] &quot;raritan&quot;             &quot;raymond&quot;             &quot;reading&quot;            
+## [208] &quot;redmond&quot;             &quot;redwoodcity&quot;         &quot;redwoodshores&quot;      
+## [211] &quot;remote&quot;              &quot;richfield&quot;           &quot;rochester&quot;          
+## [214] &quot;rockford&quot;            &quot;rollingmeadows&quot;      &quot;rosemont&quot;           
+## [217] &quot;rosslyn&quot;             &quot;saintpetersburg&quot;     &quot;sandiego&quot;           
+## [220] &quot;sanfrancisco&quot;        &quot;sanjose&quot;             &quot;santamonica&quot;        
+## [223] &quot;schaumburg&quot;          &quot;seattle&quot;             &quot;shakerheights&quot;      
+## [226] &quot;shanghai&quot;            &quot;shelton&quot;             &quot;solon&quot;              
+## [229] &quot;southeuclid&quot;         &quot;springfield&quot;         &quot;springfieldoh&quot;      
+## [232] &quot;stamford&quot;            &quot;stlouis&quot;             &quot;stow&quot;               
+## [235] &quot;stpaul&quot;              &quot;stpetersburg&quot;        &quot;sylvania&quot;           
+## [238] &quot;tampa&quot;               &quot;tampabay&quot;            &quot;tbd&quot;                
+## [241] &quot;tempe&quot;               &quot;thiefriverfalls&quot;     &quot;toledo&quot;             
+## [244] &quot;traversecity&quot;        &quot;troy&quot;                &quot;twinsburg&quot;          
+## [247] &quot;tyson&quot;               &quot;tysons&quot;              &quot;tysonscorner&quot;       
+## [250] &quot;valdosta&quot;            &quot;various&quot;             &quot;vernonhills&quot;        
+## [253] &quot;verona&quot;              &quot;walnutcreek&quot;         &quot;warren&quot;             
+## [256] &quot;warsaw&quot;              &quot;washington&quot;          &quot;washingtondc&quot;       
+## [259] &quot;washinton&quot;           &quot;webberville&quot;         &quot;westcarrollton&quot;     
+## [262] &quot;westchester&quot;         &quot;westerville&quot;         &quot;westervillecolumbus&quot;
+## [265] &quot;westjefferson&quot;       &quot;westlake&quot;            &quot;whippany&quot;           
+## [268] &quot;whiteplains&quot;         &quot;wichita&quot;             &quot;williamsport&quot;       
+## [271] &quot;wilmington&quot;          &quot;witchita&quot;            &quot;woburn&quot;             
+## [274] &quot;woodbridge&quot;          &quot;worthington&quot;         &quot;xiamem&quot;             
+## [277] &quot;zionsville&quot;</code></pre>
 </div>
 </div>
 <div id="the-rest-of-your-document" class="section level1" number="5">
@@ -2935,7 +3075,7 @@ document</h1>
 <p>Add sections and subsections as necessary to guide your analysis</p>
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNsZWFuaW5nIHRoZSBDb21iaW5lZCBCSSBBbmQgU3VydmV5IENhcmVlciBEYXRhIg0KYXV0aG9yOiAiQWxsaXNvbiBSaWxleSAmIEplbm5hIFNheWxlIg0Kb3V0cHV0Og0KICBodG1sX2RvY3VtZW50Og0KICAgIGRhdGU6ICJgciBmb3JtYXQoU3lzLnRpbWUoKSwgJyVkICVCLCAlWScpYCINCiAgICBjb2RlX2ZvbGRpbmc6IGhpZGUNCiAgICBkZl9wcmludDogcGFnZWQNCiAgICBudW1iZXJfc2VjdGlvbnM6IHllcw0KICAgIHRoZW1lOiBjZXJ1bGVhbg0KICAgIHRvYzogeWVzDQogICAgdG9jX2Zsb2F0OiB5ZXMNCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlDQogIHdvcmRfZG9jdW1lbnQ6DQogICAgdG9jOiBubw0KLS0tDQoNCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQ0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFLG1lc3NhZ2U9RkFMU0Usd2FybmluZz1GQUxTRSkNCg0KI3BhY2thZ2UgaW50aWFsaXphdGlvbg0Kcm0obGlzdCA9IGxzKCkpICMgY2xlYXIgZ2xvYmFsIGVudmlyb25tZW50DQpncmFwaGljcy5vZmYoKSAjIGNsb3NlIGFsbCBncmFwaGljcw0KaWYocmVxdWlyZShwYWNtYW4pPT1GQUxTRSkgaW5zdGFsbC5wYWNrYWdlcygicGFjbWFuIikNCnBhY21hbjo6cF9sb2FkKERhdGFFeHBsb3Jlcix0aWR5dmVyc2UscmVhZHhsLHpvbyxzdGFyZ2F6ZXIsa2FibGVFeHRyYSxza2ltcixwbG90bHksZ2dwdWJyLHZ0YWJsZSx0bSkNCmBgYA0KDQojIEludHJvZHVjdGlvbiBhbmQgUHVycG9zZQ0KDQpBbm51YWxseSwgdGhlIEZTQiBjb25kdWN0cyBhIHNlbmlvciBzdXJ2ZXkgb2YgZ3JhZHVhdGVzIHRvIGxlYXJuIG9mIHRoZWlyIGVtcGxveW1lbnQgc3RhdHVzLiBJbiBhZGRpdGlvbiwgaW5mb3JtYXRpb24gaXMgdmVyaWZpZWQgdXNpbmcgTGlua2VkSW4gYW5kIGVtcGxveWVyIHN1cnZleSBpbmZvcm1hdGlvbi4gVGhlIGRhdGEgeW91IGFyZSBwcm92aWRlZCAoJ0ZTQl9CSV9TdXJ2ZXlfMjAxOV8yMDIxLnJkcycpIGNvbnRhaW5zIGRhdGEgb24gZ3JhZHVhdGVzIGZvciAyMDE5LCAyMDIwLCBhbmQgMjAyMS4gVGhlIGRhdGEgYXJlIG1lcmdlZCBmcm9tIHR3byBzb3VyY2VzOiB0aGUgc2VuaW9yIHN1cnZleSwgYW5kIGRhdGEgZnJvbSB0aGUgTWlhbWkgVW5pdmVyc2l0eSBkYXRhYmFzZS4NCg0KVGhlIHByb2R1Y3QgYW5kIHNlcnZpY2UgdGhpcyBhbmFseXNpcyB3aWxsIHByb3ZpZGUgaXMgYSBzb3VuZGJpdGUgb24gdGhlIGdlb2dyYXBoaWMgdHJlbmRzIGluIEZTQiBwbGFjZW1lbnQgZGF0YS4gT3VyIGNsaWVudHMgd2lsbCB1dGlsaXplIG91ciBpbnNpZ2h0cyB0byBoZWxwIGRyaXZlIGJ1c2luZXNzIGRlY2lzaW9ucy4gRm9yIGV4YW1wbGUsIE1pYW1pIFVuaXZlcnNpdHkgbWF5IGRlY2lkZSB0byB0YXJnZXQgY29tcGFuaWVzIGZyb20gYSBzcGVjaWZpYyBnZW9ncmFwaGljIGFyZWEsIGJhc2VkIG9uIHNhbGFyeSBvciBqb2IgdHlwZSB0byBicmluZyB0byBjYXJlZXIgZmFpciBmb3IgYSBzcGVjaWZpYyBtYWpvci4gVGhlIHByb3ZpZGVkIGRhdGFzZXQgaXMgY29tcHJlaGVuc2l2ZSB3aXRoIDQyIGRpZmZlcmVudCBhdHRyaWJ1dGVzIHBlciByb3cuIFRoaXMgYW5hbHlzaXMgd2lsbCBwcm92aWRlIG91ciBjbGllbnQgd2l0aCBtZWFuaW5nZnVsIGluc2lnaHRzIHdpdGhvdXQgaGF2aW5nIHRvIHByb2Nlc3MgdGhlIGRhdGFzZXQuIFRoaXMgcGFpbiBraWxsZXIgd2lsbCBhbGxvdyBvdXIgY2xpZW50cyB0byBmb2N1cyB0aGVpciB0aW1lIGF0IHdvcmsgaW4gb3RoZXIgYXJlYXMuDQoNCiMgQnVzaW5lc3MgVmFsdWUgUHJvcG9zaXRpb24NCg0KIVtdKEJWUCB2Mi5wbmcpDQoNCiMgRGF0YSBTb3VyY2VzDQoNClRoZSBkYXRhIGZpbGUgcHJvdmlkZWQgaXMgZnJvbSBncmFkdWF0ZWQgc3R1ZGVudHMgd2hvIGNvbXBsZXRlZCB0aGlzIHN1cnZleSBmcm9tIDIwMTktMjAyMS4NCg0KIyMgUmVhZCBpbiB0aGUgZGF0YQ0KDQpgYGB7cn0NCmRhdGE9cmVhZFJEUyhmaWxlID0gIkZTQl9CSV9TdXJ2ZXlfMjAxOV8yMDIxLnJkcyIpDQpvcHRpb25zKHNjaXBlbiA9IDk5OSkNCmBgYA0KDQojIERhdGEgUHJlcHJvY2Vzc2luZw0KDQojIyBDbGVhbmluZyB0aGUgRGF0YQ0KDQpgYGB7cn0NCiMgUmVtb3ZpbmcgdGhvc2Ugd2hvIGFyZSAic2Vla2luZyBjb250aW51aW5nIGVkdWNhdGlvbiIsICJjb250aW51aW5nIGVkdWNhdGlvbiIsICJub3Qgc2Vla2luZyBlbXBsb3ltZW50IiwgTkENCg0KQ29sdW1uc1RvUmVtb3ZlID0gYygic2Vla2luZyBjb250aW51aW5nIGVkdWNhdGlvbiIsICJjb250aW51aW5nIGVkdWNhdGlvbiIsICJub3Qgc2Vla2luZyBlbXBsb3ltZW50IiwgIk5BIikNCg0KZGF0YV9maWx0ZXJlZCA8LSBkYXRhICU+JQ0KICBmaWx0ZXIoZGF0YSRzdXJ2ZXlfcGxhbnMgIT0gQ29sdW1uc1RvUmVtb3ZlKQ0KDQp1bmlxdWUoZGF0YV9maWx0ZXJlZCRzdXJ2ZXlfcGxhbnMpDQpgYGANClJlbW92ZSB1bm5lY2Vzc2FyeSBjb2x1bW5zDQoNCkZpeCB0ZXh0IGlzc3VlcyAoT0g9b2hpbz1vaD1PaGlvKQ0KDQpMb29rIGF0IG1pc3NpbmcgKGRyb3Agcm93IGlmIG5lZWRlZCkNCg0KTG9vayBhdCBvdXRsaWVycyAoZHJvcCByb3cgaWYgbmVlZGVkKQ0KDQoNCiMgVGhlIHJlc3Qgb2YgeW91ciBkb2N1bWVudA0KDQpBZGQgc2VjdGlvbnMgYW5kIHN1YnNlY3Rpb25zIGFzIG5lY2Vzc2FyeSB0byBndWlkZSB5b3VyIGFuYWx5c2lzDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkNsZWFuaW5nIHRoZSBDb21iaW5lZCBCSSBBbmQgU3VydmV5IENhcmVlciBEYXRhIg0KYXV0aG9yOiAiQWxsaXNvbiBSaWxleSAmIEplbm5hIFNheWxlIg0Kb3V0cHV0Og0KICBodG1sX2RvY3VtZW50Og0KICAgIGRhdGU6ICJgciBmb3JtYXQoU3lzLnRpbWUoKSwgJyVkICVCLCAlWScpYCINCiAgICBjb2RlX2ZvbGRpbmc6IGhpZGUNCiAgICBkZl9wcmludDogcGFnZWQNCiAgICBudW1iZXJfc2VjdGlvbnM6IHllcw0KICAgIHRoZW1lOiBjZXJ1bGVhbg0KICAgIHRvYzogeWVzDQogICAgdG9jX2Zsb2F0OiB5ZXMNCiAgICBjb2RlX2Rvd25sb2FkOiB0cnVlDQogIHdvcmRfZG9jdW1lbnQ6DQogICAgdG9jOiBubw0KLS0tDQoNCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQ0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFLG1lc3NhZ2U9RkFMU0Usd2FybmluZz1GQUxTRSkNCg0KI3BhY2thZ2UgaW50aWFsaXphdGlvbg0Kcm0obGlzdCA9IGxzKCkpICMgY2xlYXIgZ2xvYmFsIGVudmlyb25tZW50DQpncmFwaGljcy5vZmYoKSAjIGNsb3NlIGFsbCBncmFwaGljcw0KaWYocmVxdWlyZShwYWNtYW4pPT1GQUxTRSkgaW5zdGFsbC5wYWNrYWdlcygicGFjbWFuIikNCnBhY21hbjo6cF9sb2FkKERhdGFFeHBsb3Jlcix0aWR5dmVyc2UscmVhZHhsLHpvbyxzdGFyZ2F6ZXIsa2FibGVFeHRyYSxza2ltcixwbG90bHksZ2dwdWJyLHZ0YWJsZSx0bSwgZ3Bsb3RzLCBnZ3Bsb3QpDQpgYGANCg0KIyBJbnRyb2R1Y3Rpb24gYW5kIFB1cnBvc2UNCg0KQW5udWFsbHksIHRoZSBGU0IgY29uZHVjdHMgYSBzZW5pb3Igc3VydmV5IG9mIGdyYWR1YXRlcyB0byBsZWFybiBvZiB0aGVpciBlbXBsb3ltZW50IHN0YXR1cy4gSW4gYWRkaXRpb24sIGluZm9ybWF0aW9uIGlzIHZlcmlmaWVkIHVzaW5nIExpbmtlZEluIGFuZCBlbXBsb3llciBzdXJ2ZXkgaW5mb3JtYXRpb24uIFRoZSBkYXRhIHlvdSBhcmUgcHJvdmlkZWQgKCdGU0JfQklfU3VydmV5XzIwMTlfMjAyMS5yZHMnKSBjb250YWlucyBkYXRhIG9uIGdyYWR1YXRlcyBmb3IgMjAxOSwgMjAyMCwgYW5kIDIwMjEuIFRoZSBkYXRhIGFyZSBtZXJnZWQgZnJvbSB0d28gc291cmNlczogdGhlIHNlbmlvciBzdXJ2ZXksIGFuZCBkYXRhIGZyb20gdGhlIE1pYW1pIFVuaXZlcnNpdHkgZGF0YWJhc2UuDQoNClRoZSBwcm9kdWN0IGFuZCBzZXJ2aWNlIHRoaXMgYW5hbHlzaXMgd2lsbCBwcm92aWRlIGlzIGEgc291bmRiaXRlIG9uIHRoZSBnZW9ncmFwaGljIHRyZW5kcyBpbiBGU0IgcGxhY2VtZW50IGRhdGEuIE91ciBjbGllbnRzIHdpbGwgdXRpbGl6ZSBvdXIgaW5zaWdodHMgdG8gaGVscCBkcml2ZSBidXNpbmVzcyBkZWNpc2lvbnMuIEZvciBleGFtcGxlLCBNaWFtaSBVbml2ZXJzaXR5IG1heSBkZWNpZGUgdG8gdGFyZ2V0IGNvbXBhbmllcyBmcm9tIGEgc3BlY2lmaWMgZ2VvZ3JhcGhpYyBhcmVhLCBiYXNlZCBvbiBzYWxhcnkgb3Igam9iIHR5cGUgdG8gYnJpbmcgdG8gY2FyZWVyIGZhaXIgZm9yIGEgc3BlY2lmaWMgbWFqb3IuIFRoZSBwcm92aWRlZCBkYXRhc2V0IGlzIGNvbXByZWhlbnNpdmUgd2l0aCA0MiBkaWZmZXJlbnQgYXR0cmlidXRlcyBwZXIgcm93LiBUaGlzIGFuYWx5c2lzIHdpbGwgcHJvdmlkZSBvdXIgY2xpZW50IHdpdGggbWVhbmluZ2Z1bCBpbnNpZ2h0cyB3aXRob3V0IGhhdmluZyB0byBwcm9jZXNzIHRoZSBkYXRhc2V0LiBUaGlzIHBhaW4ga2lsbGVyIHdpbGwgYWxsb3cgb3VyIGNsaWVudHMgdG8gZm9jdXMgdGhlaXIgdGltZSBhdCB3b3JrIGluIG90aGVyIGFyZWFzLg0KDQojIEJ1c2luZXNzIFZhbHVlIFByb3Bvc2l0aW9uDQoNCiFbXShCVlAgdjIucG5nKQ0KDQojIERhdGEgU291cmNlcw0KDQpUaGUgZGF0YSBmaWxlIHByb3ZpZGVkIGlzIGZyb20gZ3JhZHVhdGVkIHN0dWRlbnRzIHdobyBjb21wbGV0ZWQgdGhpcyBzdXJ2ZXkgZnJvbSAyMDE5LTIwMjEuDQoNCiMjIFJlYWQgaW4gdGhlIGRhdGENCg0KYGBge3J9DQpkYXRhPXJlYWRSRFMoZmlsZSA9ICJGU0JfQklfU3VydmV5XzIwMTlfMjAyMS5yZHMiKQ0KDQpvcHRpb25zKHNjaXBlbiA9IDk5OSkNCmBgYA0KDQojIERhdGEgUHJlcHJvY2Vzc2luZw0KDQojIyBDbGVhbmluZyB0aGUgRGF0YQ0KDQpgYGB7cn0NCiMgUmVtb3ZpbmcgdGhvc2Ugd2hvIGFyZSAic2Vla2luZyBjb250aW51aW5nIGVkdWNhdGlvbiIsICJjb250aW51aW5nIGVkdWNhdGlvbiIsICJub3Qgc2Vla2luZyBlbXBsb3ltZW50IiwgTkENCg0KVmFsdWVUb1JlbW92ZSA9IGMoInNlZWtpbmcgY29udGludWluZyBlZHVjYXRpb24iLCAiY29udGludWluZyBlZHVjYXRpb24iLCAibm90IHNlZWtpbmcgZW1wbG95bWVudCIsICJOQSIpDQoNCmRhdGFfZmlsdGVyZWQgPC0gZGF0YVshKGRhdGEkc3VydmV5X3BsYW5zICVpbiUgVmFsdWVUb1JlbW92ZSksIF0NCg0KdW5pcXVlKGRhdGFfZmlsdGVyZWQkc3VydmV5X3BsYW5zKQ0KYGBgDQoNClJlbW92ZSB1bm5lY2Vzc2FyeSBjb2x1bW5zDQoNCmBgYHtyfQ0KIyBSZW1vdmUgdGhlIHNwZWNpZmllZCBjb2x1bW5zIGJ5IHRoZWlyIGNvbHVtbiBudW1iZXJzDQpkYXRhX2ZpbHRlcmVkMiA8LSBkYXRhX2ZpbHRlcmVkWywgYygyLDMsMjIsMjMsMjUsMjcsMjgsMjksMzcsMzgsMzksNDAsNDEsNDIpXQ0KaGVhZChkYXRhX2ZpbHRlcmVkMikNCmBgYA0KDQpMb29rIGF0IG1pc3NpbmcgKGRyb3Agcm93IGlmIG5lZWRlZCkNCmBgYHtyfQ0KY29sU3Vtcyhpcy5uYShkYXRhX2ZpbHRlcmVkMikpDQpgYGANCg0KT21pdCBOQSB2YWx1ZXMgaW4gc3VydmV5X3BsYW5zDQpgYGB7cn0NCmZpbHRlcmVkIDwtIHN1YnNldChkYXRhX2ZpbHRlcmVkMiwgIWlzLm5hKHN1cnZleV9wbGFucykpDQpjb2xTdW1zKGlzLm5hKGZpbHRlcmVkKSkNCmBgYA0KDQpGaXggdGV4dCBpc3N1ZXMgaW4gU3RhdGUNCmBgYHtyfQ0KDQpmaWx0ZXJlZCRzdXJ2ZXlfc3RhdGUgPC0gdG9sb3dlcihmaWx0ZXJlZCRzdXJ2ZXlfc3RhdGUpICMgdG8gbG93ZXIgY2FzZQ0KZmlsdGVyZWQkc3VydmV5X3N0YXRlIDwtIGdzdWIoIlteYS16QS1aXSIsICIiLCBmaWx0ZXJlZCRzdXJ2ZXlfc3RhdGUpICMgcmVtb3ZlIGFiYnJldmlhdGlvbnMNCmZpbHRlcmVkJHN1cnZleV9zdGF0ZSA8LSBtYXRjaChmaWx0ZXJlZCRzdXJ2ZXlfc3RhdGUsIHRvbG93ZXIoc3RhdGUuYWJiKSkgIyBjb252ZXJ0IHRvIG51bWVyaWNhbCByZXByZXNlbnRhdGlvbnMNCmZpbHRlcmVkJHN1cnZleV9zdGF0ZSA8LSBzdGF0ZS5uYW1lWyhmaWx0ZXJlZCRzdXJ2ZXlfc3RhdGUpXQ0KcHJpbnQodW5pcXVlKGZpbHRlcmVkJHN1cnZleV9zdGF0ZSkpDQpgYGANCg0KRml4IHRleHQgaXNzdWVzIGluIENpdHkNCg0KYGBge3J9DQpmaWx0ZXJlZCRzdXJ2ZXlfY2l0eSA8LSB0b2xvd2VyKGZpbHRlcmVkJHN1cnZleV9jaXR5KSAjIHRvIGxvd2VyIGNhc2UNCmZpbHRlcmVkJHN1cnZleV9jaXR5IDwtIGdzdWIoIlteYS16QS1aXSIsICIiLCBmaWx0ZXJlZCRzdXJ2ZXlfY2l0eSkgIyByZW1vdmUgYWJicmV2aWF0aW9ucw0KZmlsdGVyZWQkc3VydmV5X2NpdHkgPC0gZ3N1YigiXFxzKyIsICIiLCBmaWx0ZXJlZCRzdXJ2ZXlfY2l0eSkgIyByZW1vdmUgZXh0cmEgc3BhY2VzDQpmaWx0ZXJlZCRzdXJ2ZXlfY2l0eSA8LSBnc3ViKCIgY2l0eSQiLCAnJyAsICBmaWx0ZXJlZCRzdXJ2ZXlfY2l0eSkgIyByZW1vdmUgc3RyaW5nIGNpdHkgb24gdGhlIGVuZCANCg0KcHJpbnQoc29ydCh1bmlxdWUoZmlsdGVyZWQkc3VydmV5X2NpdHkpKSkNCmBgYA0KDQoNCiMgVGhlIHJlc3Qgb2YgeW91ciBkb2N1bWVudA0KDQpBZGQgc2VjdGlvbnMgYW5kIHN1YnNlY3Rpb25zIGFzIG5lY2Vzc2FyeSB0byBndWlkZSB5b3VyIGFuYWx5c2lzDQo=</div>
 
 
 </div>
