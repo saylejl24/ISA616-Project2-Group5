@@ -15,7 +15,7 @@ output:
     toc: no
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, echo = TRUE}
 knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
 
 #package intialization
@@ -41,7 +41,7 @@ The data file provided is from graduated students who completed this survey from
 
 ## Read in the data
 
-```{r}
+```{r, echo = TRUE}
 data=readRDS(file = "FSB_BI_Survey_2019_2021.rds")
 
 options(scipen = 999)
@@ -99,6 +99,40 @@ filtered$survey_city <- gsub("\\s+", "", filtered$survey_city) # remove extra sp
 filtered$survey_city <- gsub(" city$", '' ,  filtered$survey_city) # remove string city on the end 
 
 print(sort(unique(filtered$survey_city)))
+```
+
+Fix small errors in City by hand 
+
+```{r}
+# to drop : indiana, dontknowyet, na, tbd, various
+
+filtered$survey_city[filtered$survey_city == "cincinatti"] <- "cincinnati"
+filtered$survey_city[filtered$survey_city == "cincinnnati"] <- "cincinnati"
+filtered$survey_city[filtered$survey_city == "cincinnatioh"] <- "cincinnati"
+filtered$survey_city[filtered$survey_city == 'findlaytentative'] <- 'findlay'
+filtered$survey_city[filtered$survey_city == 'findley'] <- 'findlay'
+filtered$survey_city[filtered$survey_city == 'ftmyers'] <- 'fortmyers'
+filtered$survey_city[filtered$survey_city == 'hamiliton'] <- 'hamilton'
+filtered$survey_city[filtered$survey_city == 'milwaukwee'] <- 'milwaukee'
+filtered$survey_city[filtered$survey_city == 'newyork'] <- 'newyorkcity'
+filtered$survey_city[filtered$survey_city == 'nyc'] <- 'newyorkcity'
+filtered$survey_city[filtered$survey_city == 'philadephia'] <- 'philadelphia'
+filtered$survey_city[filtered$survey_city == 'springfieldoh'] <- 'springfield'
+filtered$survey_city[filtered$survey_city == 'washinton'] <- 'washington'
+filtered$survey_city[filtered$survey_city == 'washingtondc'] <- 'washington'
+filtered$survey_city[filtered$survey_city == 'westervillecolumbus'] <- 'westerville'
+filtered$survey_city[filtered$survey_city == 'witchita'] <- 'wichita'
+
+print(sort(unique(filtered$survey_city)))
+```
+
+Drop Rows with the following values : indiana, dontknowyet, na, tbd, various
+```{r}
+ValueToRemove = c("indiana", "dontknowyet", "na", "tbd", "various", "NA")
+
+filtered <- filtered[!(filtered$survey_city %in% ValueToRemove), ]
+
+unique(filtered$survey_city)
 ```
 
 
