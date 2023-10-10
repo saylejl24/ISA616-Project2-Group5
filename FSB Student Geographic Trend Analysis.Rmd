@@ -140,7 +140,35 @@ filtered <- filtered[!(filtered$survey_city %in% ValueToRemove), ]
 
 sort(unique(filtered$survey_city))
 ```
-Same 
+Same thing here as to the states. There were multiple levels for the same city.  The city names were cleaned up so there was only 1 level per city. 
+
+```{r}
+filtered$survey_company <- tolower(filtered$survey_company) # to lower case
+print(sort(unique(filtered$survey_company)))
+```
+
+
+```{r}
+filtered$survey_company[filtered$survey_company == "84.51º"] <- "84.51"
+filtered$survey_company[filtered$survey_company == "abbott nutrition"] <- "abbott"
+filtered$survey_company[filtered$survey_company == "abercrombie"] <- "abercrombie & fitch"
+filtered$survey_company[filtered$survey_company == "aldi us" | filtered$survey_company == "aldi usa"] <- "aldi"
+filtered$survey_company[filtered$survey_company == "american eagle outfitters" | filtered$survey_company == "american eagle outfitters, Inc."] <- "american eagle"
+filtered$survey_company[filtered$survey_company == "amazon web services"] <- "amazon"
+filtered$survey_company[filtered$survey_company == "american electric power (aep)"] <- "american electric power"
+filtered$survey_company[filtered$survey_company == "ameriprise financial - redstone wealth advisors"] <- "ameriprise financial services"
+filtered$survey_company[filtered$survey_company == "andersen"] <- "andersen tax"
+filtered$survey_company[filtered$survey_company == "ankura"] <- "ankura consulting"
+filtered$survey_company[filtered$survey_company == "ayco, a goldman sachs company"] <- "ayco"
+filtered$survey_company[filtered$survey_company == "barclays"] <- "barclays investment bank"
+filtered$survey_company[filtered$survey_company == "bath & body works"] <- "bath and body works"
+filtered$survey_company[filtered$survey_company == "baxter"] <- "baxter international"
+filtered$survey_company[filtered$survey_company == "bdo usa" | filtered$survey_company == "bdo usa llp"] <- "bdo"
+
+
+sort(unique(filtered$survey_company))
+```
+
 
 # The rest of your document
 
