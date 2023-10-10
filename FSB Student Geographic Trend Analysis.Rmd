@@ -51,17 +51,19 @@ options(scipen = 999)
 
 ## Cleaning the Data
 
+### Data Set Cleaning
 ```{r}
-# Removing those who are "seeking continuing education", "continuing education", "not seeking employment", NA
+# Removing those who are "seeking continuing education", "continuing education", "not seeking employment"
 
-ValueToRemove = c("seeking continuing education", "continuing education", "not seeking employment", "NA")
+ValueToRemove = c("seeking continuing education", "continuing education", "not seeking employment")
 
 data_filtered <- data[!(data$survey_plans %in% ValueToRemove), ]
 
 unique(data_filtered$survey_plans)
 ```
 
-Remove unnecessary columns
+The first thing in cleaning the data is removing the levels of `survey_plans` that are not needed when evaluating geographic trends of those with a job.  This includes removing those individuals that have selected "seeking continuing education", "continuing education", "not seeking employment". 
+
 
 ```{r}
 # Remove the specified columns by their column numbers
@@ -69,18 +71,22 @@ data_filtered2 <- data_filtered[, c(2,3,22,23,25,27,28,29,37,38,39,40,41,42)]
 head(data_filtered2)
 ```
 
-Look at missing (drop row if needed)
+The next step in cleaning the data was removing unnecessary columns that are not needed when evaluating this dataset.  This will help narrowing down the 42 columns to a limited number of columns to help focus the analysis.
+
+
 ```{r}
 colSums(is.na(data_filtered2))
 ```
 
-Omit NA values in survey_plans
 ```{r}
 filtered <- subset(data_filtered2, !is.na(survey_plans))
 colSums(is.na(filtered))
 ```
 
-Fix text issues in State
+Once the dataset is finalized, the number of missing values was evaluated.  The first variable that needed to na values to get filtered out was survey_plans.  If they did not indicate what their future plans are, it would be hard to evaluate geographic trends.  It was noticed when looking at the data that some columns have city missing, but not state missing.  For this reason, the missing values for the remaining columns are going to be kept for now.  It may get filtered out later in the analysis.
+
+### Cleaning State, City, and Job
+
 ```{r}
 
 filtered$survey_state <- tolower(filtered$survey_state) # to lower case
@@ -90,7 +96,7 @@ filtered$survey_state <- state.name[(filtered$survey_state)]
 print(unique(filtered$survey_state))
 ```
 
-Fix text issues in City
+When evaluating the data, it was noticed that there were multiple levels for the same state.  For example: OH=ohio-oh=Ohio.  This was cleaned up so there is only 1 level per state listed. 
 
 ```{r}
 filtered$survey_city <- tolower(filtered$survey_city) # to lower case
@@ -101,7 +107,6 @@ filtered$survey_city <- gsub(" city$", '' ,  filtered$survey_city) # remove stri
 print(sort(unique(filtered$survey_city)))
 ```
 
-Fix small errors in City by hand 
 
 ```{r}
 # to drop : indiana, dontknowyet, na, tbd, various
@@ -126,15 +131,16 @@ filtered$survey_city[filtered$survey_city == 'witchita'] <- 'wichita'
 print(sort(unique(filtered$survey_city)))
 ```
 
-Drop Rows with the following values : indiana, dontknowyet, na, tbd, various
 ```{r}
+# Drop Rows with the following values : indiana, dontknowyet, na, tbd, various
+
 ValueToRemove = c("indiana", "dontknowyet", "na", "tbd", "various", "NA")
 
 filtered <- filtered[!(filtered$survey_city %in% ValueToRemove), ]
 
-unique(filtered$survey_city)
+sort(unique(filtered$survey_city))
 ```
-
+Same 
 
 # The rest of your document
 
