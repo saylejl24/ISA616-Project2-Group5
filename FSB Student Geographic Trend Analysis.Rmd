@@ -1,9 +1,9 @@
 ---
 title: "Cleaning the Combined BI And Survey Career Data"
 author: "Allison Riley & Jenna Sayle"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
-    date: "`r format(Sys.time(), '%d %B, %Y')`"
     code_folding: hide
     df_print: paged
     number_sections: yes
@@ -73,14 +73,15 @@ head(data_filtered2)
 
 The next step in cleaning the data was removing unnecessary columns that are not needed when evaluating this dataset.  This will help narrowing down the 42 columns to a limited number of columns to help focus the analysis.
 
-
 ```{r}
-colSums(is.na(data_filtered2))
+plot_missing(data_filtered2)
 ```
+
+Since we want to look at entries with survey plans listed, missing values for survey plans were removed. 
 
 ```{r}
 filtered <- subset(data_filtered2, !is.na(survey_plans))
-colSums(is.na(filtered))
+plot_missing(filtered)
 ```
 
 Once the dataset is finalized, the number of missing values was evaluated.  The first variable that needed to na values to get filtered out was survey_plans.  If they did not indicate what their future plans are, it would be hard to evaluate geographic trends.  It was noticed when looking at the data that some columns have city missing, but not state missing.  For this reason, the missing values for the remaining columns are going to be kept for now.  It may get filtered out later in the analysis.
@@ -196,6 +197,15 @@ filtered$survey_company[filtered$survey_company == "barclays"] <- "barclays inve
 filtered$survey_company[filtered$survey_company == "bath & body works"] <- "bath and body works"
 filtered$survey_company[filtered$survey_company == "baxter"] <- "baxter international"
 filtered$survey_company[filtered$survey_company == "bdo usa" | filtered$survey_company == "bdo usa llp"] <- "bdo"
+```
+
+
+## Exploratory Data Analysis
+
+This EDA will help to see if there is any additional cleaning that needs to happen. 
+
+```{r}
+create_report(filtered)
 ```
 
 
