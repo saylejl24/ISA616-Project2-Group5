@@ -74,6 +74,16 @@ head(data_filtered2)
 The next step in cleaning the data was removing unnecessary columns that are not needed when evaluating this dataset.  This will help narrowing down the 42 columns to a limited number of columns to help focus the analysis.
 
 ```{r}
+options(repos = c(CRAN = "https://cran.r-project.org"))
+```
+
+
+```{r}
+#install.packages("igraph")
+library(igraph)
+
+#install.packages("DataExplorer", dependencies = TRUE)
+library(DataExplorer)
 plot_missing(data_filtered2)
 ```
 
