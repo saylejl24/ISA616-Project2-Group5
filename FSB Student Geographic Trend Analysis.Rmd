@@ -88,7 +88,6 @@ Once the dataset is finalized, the number of missing values was evaluated.  The 
 ### Cleaning State, City, and Job
 
 ```{r}
-
 filtered$survey_state <- tolower(filtered$survey_state) # to lower case
 filtered$survey_state <- gsub("[^a-zA-Z]", "", filtered$survey_state) # remove abbreviations
 filtered$survey_state <- match(filtered$survey_state, tolower(state.abb)) # convert to numerical representations
@@ -104,13 +103,12 @@ filtered$survey_city <- gsub("[^a-zA-Z]", "", filtered$survey_city) # remove abb
 filtered$survey_city <- gsub("\\s+", "", filtered$survey_city) # remove extra spaces
 filtered$survey_city <- gsub(" city$", '' ,  filtered$survey_city) # remove string city on the end 
 
-print(sort(unique(filtered$survey_city)))
+sort(unique(filtered$survey_city))
 ```
 
 
 ```{r}
 # to drop : indiana, dontknowyet, na, tbd, various
-
 filtered$survey_city[filtered$survey_city == "cincinatti"] <- "cincinnati"
 filtered$survey_city[filtered$survey_city == "cincinnnati"] <- "cincinnati"
 filtered$survey_city[filtered$survey_city == "cincinnatioh"] <- "cincinnati"
@@ -128,7 +126,7 @@ filtered$survey_city[filtered$survey_city == 'washingtondc'] <- 'washington'
 filtered$survey_city[filtered$survey_city == 'westervillecolumbus'] <- 'westerville'
 filtered$survey_city[filtered$survey_city == 'witchita'] <- 'wichita'
 
-print(sort(unique(filtered$survey_city)))
+sort(unique(filtered$survey_city))
 ```
 
 ```{r}
@@ -142,9 +140,43 @@ sort(unique(filtered$survey_city))
 ```
 Same thing here as to the states. There were multiple levels for the same city.  The city names were cleaned up so there was only 1 level per city. 
 
+
+```{r}
+library(stringdist)
+
+# Load your survey data into a data frame (replace this with your actual data)
+survey_data <- filtered
+survey_data <- survey_data[complete.cases(survey_data$survey_company), ]
+
+# Create a function to cluster similar company names
+cluster_similar_names <- function(data, threshold = 0.2) {
+  # Calculate the string distances between company names
+  dist_matrix <- stringdistmatrix(data$survey_company, data$survey_company, method = "jw")
+ 
+  # Create a hierarchical clustering based on string distances
+  hclust_result <- hclust(as.dist(dist_matrix))
+ 
+  # Cut the tree into clusters based on the threshold
+  clusters <- cutree(hclust_result, h = threshold)
+ 
+  # Add the cluster IDs to the original data frame
+  data$survey_company_id <- clusters
+ 
+  return(data)
+}
+
+# Set a threshold for clustering (adjust as needed)
+threshold <- 0.5
+
+# Cluster similar company names
+clustered_data <- cluster_similar_names(survey_data, threshold)
+
+sort(unique(filtered$survey_company))
+```
+
+
 ```{r}
 filtered$survey_company <- tolower(filtered$survey_company) # to lower case
-print(sort(unique(filtered$survey_company)))
 ```
 
 
@@ -164,12 +196,17 @@ filtered$survey_company[filtered$survey_company == "barclays"] <- "barclays inve
 filtered$survey_company[filtered$survey_company == "bath & body works"] <- "bath and body works"
 filtered$survey_company[filtered$survey_company == "baxter"] <- "baxter international"
 filtered$survey_company[filtered$survey_company == "bdo usa" | filtered$survey_company == "bdo usa llp"] <- "bdo"
-
-
-sort(unique(filtered$survey_company))
 ```
 
 
 # The rest of your document
 
 Add sections and subsections as necessary to guide your analysis
+
+
+
+##### R Version results were produced in
+```{r}
+R.version
+```
+
