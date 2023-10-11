@@ -1,0 +1,83 @@
+---
+title: "Geographic Trends Survey Results"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+#runtime: shiny
+---
+
+```{r setup, include=FALSE,echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+
+#package intialization
+if(require(pacman)==FALSE) install.packages("pacman")
+pacman::p_load(tidyverse, #for data manipulation
+               plotly, #for interactive plots
+               flexdashboard, #to make a dashboard
+               fontawesome, #for icons
+               DT #for better tables
+               )
+
+#read in data
+geographic_trends_data=read_csv("FinalCleanedData.csv")
+```
+
+# Overview {data-orientation=columns}
+
+## Column {data-width=300}
+
+### Questions
+
+The questions that this dashboard will answer are the following: 
+
+* Where are out students going (region)?
+* What are the salary differentials by region?
+* What types of jobs (By company) are students getting by region?  Are bank and consulting jobs in Chicago and NYC?
+* What are the top 3-5 job categories (by company) by city (Chicago, Cincinnati, Columbus, Cleveland)?
+
+
+## Column {data-width=300}
+
+### Insights
+
+Written insights and links to other pages that support conclusions
+   
+
+# Placement {data-orientation=columns}
+
+### Where are students going?
+
+```{r,echo=FALSE}
+
+```
+
+
+
+# Salary {data-orientation=columns}
+
+### Salary differentials by region
+
+```{r,echo=FALSE}
+
+```
+
+
+# Company Composition {data-orientation=columns}
+
+### Biggest City
+
+What types of jobs (By company) are students getting by region?  Are bank and consulting jobs in Chicago and NYC?
+
+```{r}
+
+```
+
+
+### Top 3-5 Companies by City
+
+What are the top 3-5 job categories (by company) by city (Chicago, Cincinnati, Columbus, Cleveland)?
+
+```{r}
+
+```
+

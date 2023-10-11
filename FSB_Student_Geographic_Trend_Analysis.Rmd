@@ -66,9 +66,11 @@ The first thing in cleaning the data is removing the levels of `survey_plans` th
 
 ```{r}
 # Remove the specified columns by their column numbers
-data_filtered2 <- data_filtered[, c(2,3,22,23,25,27,28,29,37,38,39,40,41,42)]
+data_filtered2 <- data_filtered[, c(2,22,23,25,27,28,29,37,38,39,40,41,42)]
 head(data_filtered2)
 ```
+
+The second step in cleaning the data was to remove all of the unnecessary columns that will not aid in the analysis of geographic trends.  We kept 13 columns from the original 42. 
 
 The next step in cleaning the data was removing unnecessary columns that are not needed when evaluating this dataset.  This will help narrowing down the 42 columns to a limited number of columns to help focus the analysis.
 
@@ -233,5 +235,6 @@ When looking at the overall EDA report, we can conclude the following.
 ##### R Version results were produced in
 ```{r, echo = FALSE}
 R.version
+write.csv(clustered_data, file = "FinalCleanedData.csv", row.names = FALSE)
 ```
 
