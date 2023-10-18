@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
 rm(list = ls()) # clear global environment
 graphics.off() # close all graphics
 if(require(pacman)==FALSE) install.packages("pacman")
-pacman::p_load(DataExplorer,tidyverse,readxl,zoo,stargazer,kableExtra,skimr,plotly,ggpubr,vtable,tm, gplots, ggplot)
+pacman::p_load(DataExplorer,tidyverse,readxl,zoo,stargazer,kableExtra,skimr,plotly,ggpubr,vtable,tm, gplots, ggplot, httr)
 ```
 
 # Introduction and Purpose
@@ -148,6 +148,57 @@ sort(unique(filtered$survey_city))
 ```
 Same thing here as to the states. There were multiple levels for the same city.  The city names were cleaned up so there was only 1 level per city. 
 
+#### Retriveing Lattitude and Longitude 
+```{r}
+
+
+survey_city = sort(unique(filtered$survey_city))
+
+# Initialize empty vectors for latitude and longitude
+latitude <- numeric(length(survey_city))
+longitude <- numeric(length(survey_city))
+#print(length(filtered$survey_city)) # Should take about 19 mins to run 
+
+
+
+for (i in 1:length(survey_city)) { 
+  #print(survey_city[i])
+  api_url <- paste0("https://geocode.maps.co/search?q=" , survey_city[i])
+  #api_url <- "https://geocode.maps.co/search?q=dfghjkgbjghjgh"
+  response <- GET(api_url)
+  result <- content(response, "parsed")
+  Sys.sleep(0.5)  # Pause for 0.7 seconds
+  
+  if (is.list(result) && length(result) > 0) {
+    # Valid response
+    # Process the data
+    #print(result[[1]]$lat)
+    latitude[i] <- result[[1]]$lat
+    #print(result[[1]]$lon)
+    longitude[i] <- result[[1]]$lon
+  } else {
+    # Invalid response due to an HTTP error
+    # Handle the HTTP error
+    #print("Invalid")
+    latitude[i] = NA
+    longitude[i] = NA 
+    next 
+  }
+
+  #break
+}
+
+```
+##### Apply Latitude and Longitude to Filtered Data Set
+```{r}
+geoInfo = as.data.frame(cbind(survey_city, latitude, longitude))
+print(head(geoInfo))
+
+merged_data <- left_join(filtered, geoInfo, by = "survey_city")
+filtered <- merged_data
+```
+
+
 #### Cleaning the Job name
 This was a daunting task as there were too many incorrectly entered job titles to comfortably do this by hand. Instead, we created a function that groups entries with similiar names together, under a single job name based on a computed string distance. This method was tested with different thresholds, lower ones being more strict and higher ones being less strict until a threshold = 0.2 was decided on because it correctly clusters names without incorrectly grouping (at the expense of only a few duplicate clusters). 
 ```{r}
@@ -202,8 +253,12 @@ clustered_data <- cluster_similar_names(survey_data, threshold)
 print("Unique Company Names Before Clustering:")
 #print(sort(unique(filtered$survey_company)))
 
+CompValueToRemove = c("*startup that cannot be named")
+
+clustered_data <- clustered_data[!(clustered_data$survey_company_cluster_name %in% CompValueToRemove), ]
+
 print("Unique Company Names After Clustering:")
-print(sort(unique(clustered_data$survey_company_cluster_name)))
+print(head(sort(unique(clustered_data$survey_company_cluster_name))))
 
 
 ```

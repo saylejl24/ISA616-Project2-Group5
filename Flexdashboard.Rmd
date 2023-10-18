@@ -15,7 +15,10 @@ pacman::p_load(tidyverse, #for data manipulation
                plotly, #for interactive plots
                flexdashboard, #to make a dashboard
                fontawesome, #for icons
-               DT #for better tables
+               DT, 
+               ggplot2, 
+               maps,
+               ggrepel#for better tables
                )
 
 #read in data
@@ -45,13 +48,37 @@ Written insights and links to other pages that support conclusions
 
 # Placement {data-orientation=columns}
 
-### Where are students going?
+## Column {data-width=300}
+
+### Where are students going in the USA?
+
 
 ```{r,echo=FALSE}
 
+# Get a map of the United States
+us_map <- map_data("world")
+
+ggplot() +
+  geom_polygon(data = us_map, aes(x=long, y = lat, group = group), fill="black", alpha=0.1) +
+  geom_path(data = us_map, aes(x = long, y = lat, group = group), color = "gray", size = 0.5) +  # Add state borders
+  geom_point(data = geographic_trends_data, aes(x = longitude, y = latitude, alpha = 0.3), color = "blue") +  
+  coord_cartesian(xlim = c(-125, -65), ylim = c(24, 49)) 
 ```
 
+## Column {data-width=300}
 
+### Worldwide
+
+```{r,echo=FALSE}
+
+# Get a map of the United States
+us_map <- map_data("world")
+
+ggplot() +
+  geom_polygon(data = us_map, aes(x=long, y = lat, group = group), fill="black", alpha=0.1) +
+  geom_path(data = us_map, aes(x = long, y = lat, group = group), color = "gray", size = 0.5) +  # Add state borders
+  geom_point(data = geographic_trends_data, aes(x = longitude, y = latitude, alpha = 0.3), color = "blue") 
+```
 
 # Salary {data-orientation=columns}
 
@@ -63,6 +90,20 @@ Written insights and links to other pages that support conclusions
 
 
 # Company Composition {data-orientation=columns}
+
+```{r}
+# Create a frequency table of the survey_city column
+city_frequency <- table(geographic_trends_data$survey_city)
+
+# Sort the frequency table in descending order
+sorted_city_frequency <- sort(city_frequency, decreasing = TRUE)
+
+# Get the top ten most occurring cities
+top_ten_cities <- names(sorted_city_frequency[1:10])
+
+print(top_ten_cities)
+
+```
 
 ### Biggest City
 
