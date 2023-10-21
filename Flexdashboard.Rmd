@@ -43,7 +43,8 @@ The questions that this dashboard will answer are the following:
 
 ### Insights
 
-Written insights and links to other pages that support conclusions
+* Accounting and Finance are the top type of jobs in Chicago and NYC. Chicago does have a handful of alumni doing Consulting at West Monroe Partners.
+* EY and Deloitte is the in the top 3 companies for Cincinnati, Chicago and Cleveland.
    
 
 # Placement {data-orientation=columns}
@@ -91,7 +92,7 @@ ggplot() +
 
 # Company Composition {data-orientation=columns}
 
-```{r}
+```{r, echo=FALSE}
 # Create a frequency table of the survey_city column
 city_frequency <- table(geographic_trends_data$survey_city)
 
@@ -101,24 +102,131 @@ sorted_city_frequency <- sort(city_frequency, decreasing = TRUE)
 # Get the top ten most occurring cities
 top_ten_cities <- names(sorted_city_frequency[1:10])
 
-print(top_ten_cities)
+#print(top_ten_cities)
 
 ```
 
-### Biggest City
+## column {data-height=600}
 
-What types of jobs (By company) are students getting by region?  Are bank and consulting jobs in Chicago and NYC?
+### What types of jobs (By company) are students getting by region?  
 
-```{r}
+```{r, echo=FALSE}
+data = geographic_trends_data %>%
+  group_by(survey_city, survey_company_cluster_name) %>%
+  summarize(count=n()) %>%
+  arrange(-count, survey_company_cluster_name)
 
+datatable(data, rownames=F, extensions = 'Buttons', 
+          options = list(dom='Bfrtip',
+                         buttons=c('copy','csv','excel')
+                         ),
+          filter=list(position='bottom',
+                      clear=F,plain=T
+                      )
+          )
+```
+
+## column {data-height=600}
+
+### Are bank and consulting jobs in Chicago and NYC?
+
+#### NYC
+
+```{r, echo=FALSE}
+geographic_trends_data$survey_city[geographic_trends_data$survey_city=="newyorkcity"] <- "NYC"
+data = geographic_trends_data %>%
+  filter(survey_city=="NYC" ) %>%
+  group_by(survey_city, survey_company_cluster_name, survey_deptfunc) %>%
+  summarize(count=n()) %>%
+  arrange(-count, survey_company_cluster_name, survey_city)
+
+datatable(data, rownames=F, extensions = 'Buttons', 
+          options = list(dom='Bfrtip',
+                         buttons=c('copy','csv','excel')
+                         ),
+          filter=list(position='bottom',
+                      clear=F,plain=T
+                      )
+          )
+```
+
+#### Chicago
+```{r, echo=FALSE}
+data = geographic_trends_data %>%
+  filter(survey_city=="chicago") %>%
+  group_by(survey_city, survey_company_cluster_name, survey_deptfunc) %>%
+  summarize(count=n()) %>%
+  arrange(-count, survey_company_cluster_name, survey_city)
+
+datatable(data, rownames=F, extensions = 'Buttons', 
+          options = list(dom='Bfrtip',
+                         buttons=c('copy','csv','excel')
+                         ),
+          filter=list(position='bottom',
+                      clear=F,plain=T
+                      )
+          )
+```
+
+# Top 3-5 Companies by City {data-orientation=columns}
+
+What are the top 3-5 job categories (by company) by city (Chicago, Cincinnati, Cleveland, Columbus)?
+
+## row {data-height=600}
+
+### Chicago
+
+```{r, echo=FALSE}
+data = geographic_trends_data %>%
+  filter(survey_city=="chicago") %>%
+  group_by(survey_city, survey_company_cluster_name) %>%
+  summarize(count=n()) %>%
+  arrange(-count, survey_company_cluster_name) %>%
+  slice_head(n = 5)
+
+datatable(data, rownames=F, extensions = 'Buttons')
+```
+
+### Cleveland
+
+```{r, echo=FALSE}
+data = geographic_trends_data %>%
+  filter(survey_city=="cleveland") %>%
+  group_by(survey_city, survey_company_cluster_name) %>%
+  summarize(count=n()) %>%
+  arrange(-count, survey_company_cluster_name) %>%
+  slice_head(n = 5)
+
+datatable(data, rownames=F, extensions = 'Buttons')
 ```
 
 
-### Top 3-5 Companies by City
+## row {data-height=600}
 
-What are the top 3-5 job categories (by company) by city (Chicago, Cincinnati, Columbus, Cleveland)?
 
-```{r}
+### Cincinnati
 
+```{r, echo=FALSE}
+data = geographic_trends_data %>%
+  filter(survey_city=="cincinnati") %>%
+  group_by(survey_city, survey_company_cluster_name) %>%
+  summarize(count=n()) %>%
+  arrange(-count, survey_company_cluster_name) %>%
+  slice_head(n = 5)
+
+datatable(data, rownames=F, extensions = 'Buttons')
 ```
 
+
+### Columbus
+
+```{r, echo=FALSE}
+data = geographic_trends_data %>%
+  filter(survey_city=="columbus") %>%
+  group_by(survey_city, survey_company_cluster_name) %>%
+  summarize(count=n()) %>%
+  arrange(-count, survey_company_cluster_name) %>%
+  slice_head(n = 5)
+
+datatable(data, rownames=F, extensions = 'Buttons')
+```

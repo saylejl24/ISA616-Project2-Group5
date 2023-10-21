@@ -109,7 +109,7 @@ filtered$survey_city <- gsub("[^a-zA-Z]", "", filtered$survey_city) # remove abb
 filtered$survey_city <- gsub("\\s+", "", filtered$survey_city) # remove extra spaces
 filtered$survey_city <- gsub(" city$", '' ,  filtered$survey_city) # remove string city on the end 
 
-#sort(unique(filtered$survey_city))
+sort(unique(filtered$survey_city))
 ```
 
 This task requires some extra cleaning to be done by hand for misspelled cities 
@@ -132,7 +132,7 @@ filtered$survey_city[filtered$survey_city == 'washingtondc'] <- 'washington'
 filtered$survey_city[filtered$survey_city == 'westervillecolumbus'] <- 'westerville'
 filtered$survey_city[filtered$survey_city == 'witchita'] <- 'wichita'
 
-#sort(unique(filtered$survey_city))
+sort(unique(filtered$survey_city))
 ```
 
 Thurthermore, drop rows with values for city name that are irrelevant to our analysis : (indiana, dontknowyet, na, tbd, various)
@@ -150,8 +150,6 @@ Same thing here as to the states. There were multiple levels for the same city. 
 
 #### Retriveing Lattitude and Longitude 
 ```{r}
-
-
 survey_city = sort(unique(filtered$survey_city))
 
 # Initialize empty vectors for latitude and longitude
