@@ -45,6 +45,8 @@ The questions that this dashboard will answer are the following:
 
 ### Insights
 
+* Top 4 placement cities for students graduating Miami University FSB is Chicago, Cincinnati, Columbus, and Cleveland. 
+* On average, the top paying city is NYC, however it is shocking that it is just over $67,000.  The top paying state is California with New York to shortly follow. 
 * Accounting and Finance are the top type of jobs in Chicago and NYC. Chicago does have a handful of alumni doing Consulting at West Monroe Partners.
 * EY and Deloitte is the in the top 3 companies for Cincinnati, Chicago and Cleveland.
    
@@ -82,11 +84,13 @@ geographic_trends_subset <- geographic_trends_data %>%
 us_map <- map_data("world")
 
 ggplot() +
-  geom_polygon(data = us_map, aes(x=long, y = lat, group = group), fill="black", alpha=0.1) +
+  geom_polygon(data = us_map, aes(x=long, y = lat, group = group), fill="white", alpha=0.1) +
   geom_path(data = us_map, aes(x = long, y = lat, group = group), color = "gray", size = 0.5) +  # Add state borders
   geom_point(data = geographic_trends_data, aes(x = longitude, y = latitude, alpha = 0.2), color = 'purple') +  
   coord_cartesian(xlim = c(-110, -65), ylim = c(25, 50) ) + 
-  geom_text(data = geographic_trends_subset, aes(x = longitude, y = latitude, label = survey_city), hjust = 0.5, vjust = 0.5, size = 2.7)
+  geom_text(data = geographic_trends_subset, aes(x = longitude, y = latitude, label = survey_city), hjust = 0.1, vjust = 0.1, size = 2.5) +
+  scale_alpha(guide = "none") +
+  theme_minimal() 
 ```
 
 ## Column {data-width=150}
@@ -94,14 +98,16 @@ ggplot() +
 ### Top 10 Placement Cities
 
 ```{r,echo=FALSE}
-
 data <- geographic_trends_data %>%
   filter(!is.na(survey_city)) %>%  # Remove rows where survey_city is NULL
   group_by(survey_city) %>%
   summarize(count = n()) %>%
   arrange(-count, survey_city)
 
-datatable(data, rownames = FALSE, extensions = 'Buttons', 
+custom_column_names <- c("City", "Number of Students")
+
+
+datatable(data, rownames = FALSE, extensions = 'Buttons', colnames = custom_column_names,
           options = list(dom = 'Bfrtip',
                          buttons = c('copy', 'csv', 'excel')
                          ),
@@ -109,7 +115,6 @@ datatable(data, rownames = FALSE, extensions = 'Buttons',
                         clear = FALSE, plain = TRUE
                         )
           )
-
 ```
 
 # Salary {data-orientation=columns}
@@ -119,7 +124,6 @@ datatable(data, rownames = FALSE, extensions = 'Buttons',
 ### Average Salary per State
 
 ```{r,echo=FALSE}
-
 datasal <- geographic_trends_data %>%
   filter(survey_salary > 0) %>%
   group_by(survey_state) %>%
@@ -130,7 +134,9 @@ datasal <- geographic_trends_data %>%
   ) %>%
   arrange(desc(avgSalary), survey_state)
 
-datatable(datasal, rownames = FALSE, extensions = 'Buttons', 
+custom_column_names <- c("City", "Company", "Number of Students")
+
+datatable(datasal, rownames = FALSE, extensions = 'Buttons', colnames = custom_column_names,
           options = list(dom = 'Bfrtip',
                          buttons = c('copy', 'csv', 'excel')
                          ),
@@ -203,7 +209,9 @@ data = geographic_trends_data %>%
   summarize(count=n()) %>%
   arrange(-count, survey_company_cluster_name)
 
-datatable(data, rownames=F, extensions = 'Buttons', 
+custom_column_names <- c("City", "Company", "Number of Students")
+
+datatable(data, rownames=F, extensions = 'Buttons', colnames = custom_column_names,
           options = list(dom='Bfrtip',
                          buttons=c('copy','csv','excel')
                          ),
@@ -223,11 +231,13 @@ datatable(data, rownames=F, extensions = 'Buttons',
 geographic_trends_data$survey_city[geographic_trends_data$survey_city=="newyorkcity"] <- "NYC"
 data = geographic_trends_data %>%
   filter(survey_city=="NYC" ) %>%
-  group_by(survey_city, survey_company_cluster_name, survey_deptfunc) %>%
+  group_by(survey_city, survey_company_cluster_name, survey_deptfunc, survey_salary) %>%
   summarize(count=n()) %>%
   arrange(-count, survey_company_cluster_name, survey_city)
 
-datatable(data, rownames=F, extensions = 'Buttons', 
+custom_column_names <- c("City", "Company", "Job Position", "Salary", "Number of Students")
+
+datatable(data, rownames=F, extensions = 'Buttons', colnames = custom_column_names,
           options = list(dom='Bfrtip',
                          buttons=c('copy','csv','excel')
                          ),
@@ -241,11 +251,13 @@ datatable(data, rownames=F, extensions = 'Buttons',
 ```{r, echo=FALSE}
 data = geographic_trends_data %>%
   filter(survey_city=="chicago") %>%
-  group_by(survey_city, survey_company_cluster_name, survey_deptfunc) %>%
+  group_by(survey_city, survey_company_cluster_name, survey_deptfunc, survey_salary) %>%
   summarize(count=n()) %>%
   arrange(-count, survey_company_cluster_name, survey_city)
 
-datatable(data, rownames=F, extensions = 'Buttons', 
+custom_column_names <- c("City", "Company", "Job Position", "Salary", "Number of Students")
+
+datatable(data, rownames=F, extensions = 'Buttons', colnames = custom_column_names,
           options = list(dom='Bfrtip',
                          buttons=c('copy','csv','excel')
                          ),
@@ -271,7 +283,8 @@ data = geographic_trends_data %>%
   arrange(-count, survey_company_cluster_name) %>%
   slice_head(n = 5)
 
-datatable(data, rownames=F, extensions = 'Buttons')
+custom_column_names <- c("City", "Company", "Number of Students")
+datatable(data, rownames=F, extensions = 'Buttons', colnames = custom_column_names)
 ```
 
 ### Cleveland
@@ -284,7 +297,8 @@ data = geographic_trends_data %>%
   arrange(-count, survey_company_cluster_name) %>%
   slice_head(n = 5)
 
-datatable(data, rownames=F, extensions = 'Buttons')
+custom_column_names <- c("City", "Company", "Number of Students")
+datatable(data, rownames=F, extensions = 'Buttons', colnames = custom_column_names)
 ```
 
 
@@ -301,7 +315,8 @@ data = geographic_trends_data %>%
   arrange(-count, survey_company_cluster_name) %>%
   slice_head(n = 5)
 
-datatable(data, rownames=F, extensions = 'Buttons')
+custom_column_names <- c("City", "Company", "Number of Students")
+datatable(data, rownames=F, extensions = 'Buttons', colnames = custom_column_names)
 ```
 
 
@@ -315,5 +330,6 @@ data = geographic_trends_data %>%
   arrange(-count, survey_company_cluster_name) %>%
   slice_head(n = 5)
 
-datatable(data, rownames=F, extensions = 'Buttons')
+custom_column_names <- c("City", "Company", "Number of Students")
+datatable(data, rownames=F, extensions = 'Buttons', colnames = custom_column_names)
 ```
