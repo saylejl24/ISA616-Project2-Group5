@@ -18,7 +18,9 @@ pacman::p_load(tidyverse, #for data manipulation
                DT, 
                ggplot2, 
                maps,
-               ggrepel#for better tables
+               ggrepel, #for better tables
+               dplyr,
+               uscities
                )
 
 #read in data
@@ -49,43 +51,128 @@ The questions that this dashboard will answer are the following:
 
 # Placement {data-orientation=columns}
 
-## Column {data-width=300}
+## Column {data-width=450}
 
 ### Where are students going in the USA?
 
 
 ```{r,echo=FALSE}
 
+# fix NYC coordinates 
+# Define the true coordinates of New York City
+nyc_latitude <- 40.7128
+nyc_longitude <- -74.0060
+
+# Fill the rows where survey_city is 'newyorkcity' with the true coordinates
+geographic_trends_data <- geographic_trends_data %>%
+  mutate(latitude = ifelse(survey_city == 'newyorkcity', nyc_latitude, latitude),
+         longitude = ifelse(survey_city == 'newyorkcity', nyc_longitude, longitude))
+
+top_cities <- geographic_trends_data %>% 
+  group_by(survey_city) %>%
+  summarize(listing_count = n()) %>%
+  arrange(desc(listing_count)) %>%
+  top_n(10, listing_count)
+
+# Subset the geographic_trends_data to only include the top 10 cities
+geographic_trends_subset <- geographic_trends_data %>%
+  filter(survey_city %in% top_cities$survey_city)
+
 # Get a map of the United States
 us_map <- map_data("world")
 
 ggplot() +
   geom_polygon(data = us_map, aes(x=long, y = lat, group = group), fill="black", alpha=0.1) +
   geom_path(data = us_map, aes(x = long, y = lat, group = group), color = "gray", size = 0.5) +  # Add state borders
-  geom_point(data = geographic_trends_data, aes(x = longitude, y = latitude, alpha = 0.3), color = "blue") +  
-  coord_cartesian(xlim = c(-125, -65), ylim = c(24, 49)) 
+  geom_point(data = geographic_trends_data, aes(x = longitude, y = latitude, alpha = 0.2), color = 'purple') +  
+  coord_cartesian(xlim = c(-110, -65), ylim = c(25, 50) ) + 
+  geom_text(data = geographic_trends_subset, aes(x = longitude, y = latitude, label = survey_city), hjust = 0.5, vjust = 0.5, size = 2.7)
 ```
 
-## Column {data-width=300}
+## Column {data-width=150}
 
-### Worldwide
+### Top 10 Placement Cities
 
 ```{r,echo=FALSE}
 
-# Get a map of the United States
-us_map <- map_data("world")
+data <- geographic_trends_data %>%
+  filter(!is.na(survey_city)) %>%  # Remove rows where survey_city is NULL
+  group_by(survey_city) %>%
+  summarize(count = n()) %>%
+  arrange(-count, survey_city)
 
-ggplot() +
-  geom_polygon(data = us_map, aes(x=long, y = lat, group = group), fill="black", alpha=0.1) +
-  geom_path(data = us_map, aes(x = long, y = lat, group = group), color = "gray", size = 0.5) +  # Add state borders
-  geom_point(data = geographic_trends_data, aes(x = longitude, y = latitude, alpha = 0.3), color = "blue") 
+datatable(data, rownames = FALSE, extensions = 'Buttons', 
+          options = list(dom = 'Bfrtip',
+                         buttons = c('copy', 'csv', 'excel')
+                         ),
+          filter = list(position = 'bottom',
+                        clear = FALSE, plain = TRUE
+                        )
+          )
+
 ```
 
 # Salary {data-orientation=columns}
 
-### Salary differentials by region
+## Column {data-width=300}
+
+### Average Salary per State
 
 ```{r,echo=FALSE}
+
+datasal <- geographic_trends_data %>%
+  filter(survey_salary > 0) %>%
+  group_by(survey_state) %>%
+  filter(n() >= 10) %>%
+  summarize(
+    avgSalary = scales::dollar(mean(survey_salary)),  # Format as currency
+    rowCount = n()  # Count of rows per group
+  ) %>%
+  arrange(desc(avgSalary), survey_state)
+
+datatable(datasal, rownames = FALSE, extensions = 'Buttons', 
+          options = list(dom = 'Bfrtip',
+                         buttons = c('copy', 'csv', 'excel')
+                         ),
+          filter = list(position = 'bottom',
+                        clear = FALSE, plain = TRUE
+                        )
+          )
+
+```
+
+## Column {data-width=300}
+### Average Salary for Top 10 locations
+
+```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+
+datasal <- geographic_trends_data %>%
+  filter(!is.na(survey_city)) %>% 
+  filter(survey_salary > 0) %>%
+  group_by(survey_city) %>%
+  filter(n() >= 10) %>%
+  summarize(
+    avgSalary = scales::dollar(mean(survey_salary)),  # Format as currency
+    rowCount = n()  # Count of rows per group
+  ) %>%
+  arrange(desc(avgSalary), survey_city)
+
+top_cities <- datasal %>%
+  arrange(desc(rowCount)) %>%
+  top_n(10, rowCount)
+
+
+# Create a graph with the specified requirements
+ggplot(top_cities, aes(x = rowCount, y = avgSalary)) +
+  geom_point(color = "purple") +
+  geom_text(aes(label = survey_city), hjust = .4, vjust = -0.5, size = 3) +
+  theme_minimal() +
+  labs(
+    x = "N",
+    y = "Average Salary"
+  )
 
 ```
 
