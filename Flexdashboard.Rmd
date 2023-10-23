@@ -88,7 +88,7 @@ ggplot() +
   geom_path(data = us_map, aes(x = long, y = lat, group = group), color = "gray", size = 0.5) +  # Add state borders
   geom_point(data = geographic_trends_data, aes(x = longitude, y = latitude, alpha = 0.2), color = 'purple') +  
   coord_cartesian(xlim = c(-110, -65), ylim = c(25, 50) ) + 
-  geom_text(data = geographic_trends_subset, aes(x = longitude, y = latitude, label = survey_city), hjust = 0.1, vjust = 0.1, size = 2.5) +
+  geom_text(data = geographic_trends_subset, aes(x = longitude, y = latitude, label = survey_city), hjust = 0.001, vjust = 0.1, size = 2.5) +
   scale_alpha(guide = "none") +
   theme_minimal() 
 ```
