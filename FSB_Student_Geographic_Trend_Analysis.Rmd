@@ -22,7 +22,8 @@ knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
 rm(list = ls()) # clear global environment
 graphics.off() # close all graphics
 if(require(pacman)==FALSE) install.packages("pacman")
-pacman::p_load(DataExplorer,tidyverse,readxl,zoo,stargazer,kableExtra,skimr,plotly,ggpubr,vtable,tm, gplots, ggplot, httr)
+pacman::p_load(DataExplorer,tidyverse,readxl,zoo,stargazer,kableExtra,skimr,plotly,ggpubr,vtable,tm, gplots, ggplot, httr,stringdist)
+
 ```
 
 # Introduction and Purpose
@@ -37,7 +38,52 @@ The product and service this analysis will provide is a soundbite on the geograp
 
 # Data Description
 
-The data file provided is from graduated students who completed this survey from 2019-2021. The files contains 42 variables (columns) with 3,235 observations. There are 4 variables that are factors, 18 variables that are integers or numeric, and 20 variables that are characters.
+The data file provided is from graduated students who completed this survey from 2019-2021. The data come from two sources, OBIEE and a senior survey.  The files contains 42 variables (columns) with 3,235 observations. There are 4 variables that are factors, 18 variables that are integers or numeric, and 20 variables that are characters. 
+
+1. `nmajor`: numeric,derived, the number of majors
+2. `major1`: text, OBIEE, first major
+3. `major 2`: text, OBIEE, second major
+4. `BBRJ`: binary, OBIEE, an attribute of a student, but we do not know what this stands for
+5. `Business Direct Admit`: binary, OBIEE, a direct admit to FSB as a first year
+6. `Combined Cacc and Masters`: binary, OBIEE, combined degree student
+7. `Dean's List`: binary, OBIEE, achieve dean's list status at least once
+8. `First Generation College Stdnt`: binary, OBIEE, first generation student status
+9. `FSB Scholars`: binary, OBIEE, FSB scholars program
+10. `Honors Program`: binary, OBIEE, member of University honors program
+11. `President's list`: binary, OBIEE, achieved president's list at least once
+12. `Study Abroud Courtesy Account`: binary, OBIEE, do not know meaning
+13. `Transfer Work`: binary, OBIEE, do not know exact meaning
+14. `Cum Laude`: binary, OBIEE, graduated Cum Laude
+15. `Magna Cum Laude`: binary, OBIEE, graduated Magna Cum Laude
+16. `Summa Cum Laude`: binary, OBIEE, graduated Summa Cum Laude
+17. `University Honors`: binary, OBIEE, graduated with University Honors
+18. `University Honors w/Distinction`: binary, OBIEE, graduated with University Honors with Distinction
+19. `minor1`: text, OBIEE, first listed minor
+20. `minor2`: text, OBIEE, second listed minor
+21. `IPEDS.Race.Ethnicity`: text, OBIEE, race/ethnicity
+22. `Gender`: text, OBIEE, sex
+23. `GPA.Range`: text, OBIEE, GPA within a .5 range
+24. `Term.Code`: numberic, OBIEE, First four digits are the physcal year (beginning in July, e.g. July 2020 is FY 2021). Last two digits is the term (10=fall, 15=winter, 20=spring, 30=summer).
+25. `Year.x`: text, derived, first four digits of Term.Code stored as a character variable
+26. `latin_honors`: text, survey, latin honors designation
+27. `survey_city`: text, survey, student reported city in which their job is located
+28. `survey_company`: text, survey, student reported company in which they accepted a job
+29. `survey_deptfunc`: text, survey, student reported job function
+30. `survey_gradprogram`: text, survey, student reported graduate program they will be attending
+31. `survey_gradschool`: text, survey, stuent reported graduate school they will be attending
+32. `survey_internfour`: text, survey, student reported fourth internship they held during college
+33. `survey_internthree`: text, survey, student reported third internship they held during college
+34. `survey_interntwo`: text, survey, student reported second internship they held during college
+35. `survey_internone`: text, survey, student reported first internship they held during college
+36. `Survey_internships`: text, survey, Student reported number of internships they held during college
+37. `survey_offers`: text, survey, student reported number of offers for full time employment received
+38. `survey_plans`: text, survey, student reported plans after graduation
+39. `survey_pref_field`: text, survey, student reported whether working in preferred field
+40. `survey_pref_loc`: text, survey, student reported whether working in preferred location
+41. `survey_salary`: numeric, survey, student reported salary
+42. `survey_state`: text, survey, student reported state in which job is located
+
+# Data Preprocessing
 
 ## Read in the data
 
@@ -46,8 +92,6 @@ data=readRDS(file = "FSB_BI_Survey_2019_2021.rds")
 
 options(scipen = 999)
 ```
-
-# Data Preprocessing
 
 ## Cleaning the Data
 
@@ -157,8 +201,6 @@ latitude <- numeric(length(survey_city))
 longitude <- numeric(length(survey_city))
 #print(length(filtered$survey_city)) # Should take about 19 mins to run 
 
-
-
 for (i in 1:length(survey_city)) { 
   #print(survey_city[i])
   api_url <- paste0("https://geocode.maps.co/search?q=" , survey_city[i])
@@ -185,7 +227,6 @@ for (i in 1:length(survey_city)) {
 
   #break
 }
-
 ```
 ##### Apply Latitude and Longitude to Filtered Data Set
 ```{r}
@@ -200,8 +241,6 @@ filtered <- merged_data
 #### Cleaning the Job name
 This was a daunting task as there were too many incorrectly entered job titles to comfortably do this by hand. Instead, we created a function that groups entries with similiar names together, under a single job name based on a computed string distance. This method was tested with different thresholds, lower ones being more strict and higher ones being less strict until a threshold = 0.2 was decided on because it correctly clusters names without incorrectly grouping (at the expense of only a few duplicate clusters). 
 ```{r}
-library(stringdist)
-
 # Load your survey data into a data frame (replace this with your actual data)
 survey_data <- filtered
 survey_data <- survey_data[complete.cases(survey_data$survey_company), ]
@@ -240,7 +279,11 @@ cluster_similar_names <- function(data, threshold = 0.7) {
 
   return(data)
 }
+```
 
+The threshold was selected after using trial and error. Depending on the threshold will depend on how well the companies match with each other. 
+
+```{r}
 # Set a threshold for clustering (adjust as needed)
 threshold <- 0.2
 
@@ -257,8 +300,6 @@ clustered_data <- clustered_data[!(clustered_data$survey_company_cluster_name %i
 
 print("Unique Company Names After Clustering:")
 print(head(sort(unique(clustered_data$survey_company_cluster_name))))
-
-
 ```
 
 
@@ -283,6 +324,28 @@ When looking at the overall EDA report, we can conclude the following.
 2) When looking at the histogram for the salary, there is a student who reported a salary of $175,000.  This is considered an outlier given the rest of the salary data is much less.  However, we are going to treat this value as true to what it is.  
 
 3) According to the normal QQ plot and the histogram, the salary data is roughly distributed normally.  With the results of the EDA, we are going to keep the cleaning where it is at to start the analysis.  If we need to go back and clean as we go through the analysis, we will do the necessary cleaning to boost the analysis
+
+
+## Resulting DataFrame Data Description
+
+With the cleaning of data, removal of unnecessary columns, and added columns below is the data description of the resulting data frame. 
+
+1. `major1`: text, OBIEE, first major
+2. `Gender`: text, OBIEE, sex
+3. `GPA.Range`: text, OBIEE, GPA within a .5 range
+4. `Year.x`: text, derived, first four digits of Term.Code stored as a character variable
+5. `survey_city`: text, survey, student reported city in which their job is located
+6. `survey_company`: text, survey, student reported company in which they accepted a job
+7. `survey_deptfunc`: text, survey, student reported job function
+8. `survey_offers`: text, survey, student reported number of offers for full time employment received
+9. `survey_plans`: text, survey, student reported plans after graduation
+10. `survey_pref_field`: text, survey, student reported whether working in preferred field
+11. `survey_pref_loc`: text, survey, student reported whether working in preferred location
+12. `survey_salary`: numeric, survey, student reported salary
+13. `survey_state`: text, survey, student reported state in which job is located
+14. `latitude`: Latitude of city
+15. `longitude`: Longitude of city
+16. `survey_company_cluster_name`: Cleaned `survey_company` column
 
 
 ##### R Version results were produced in
