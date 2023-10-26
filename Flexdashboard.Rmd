@@ -20,8 +20,8 @@ pacman::p_load(tidyverse, #for data manipulation
                maps,
                ggrepel, #for better tables
                dplyr,
-               uscities
-               )
+               uscities,
+               stringdist)
 
 #read in data
 geographic_trends_data=read_csv("FinalCleanedData.csv")
@@ -151,9 +151,6 @@ datatable(datasal, rownames = FALSE, extensions = 'Buttons', colnames = custom_c
 ### Average Salary for Top 10 locations
 
 ```{r, echo=FALSE}
-library(dplyr)
-library(ggplot2)
-
 datasal <- geographic_trends_data %>%
   filter(!is.na(survey_city)) %>% 
   filter(survey_salary > 0) %>%
