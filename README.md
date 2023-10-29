@@ -55,4 +55,14 @@ You have three years of data representing FSB graduates, including graduates in 
 41.  survey_salary: numeric, survey, student reported salary
 42.  survey_state: text, survey, student reported state in which job is located
 
+## Process on Running the Data
 
+This responsitory contains 2 rmd files.  The first FSB_Student_Geographic_Trend_Analysis and Flexdashboard.  Each file targets 2 separate things.  The first file is focused on cleaning the data and getting it ready for viziualizations.  The second file is the dashboard with the vizualizations for the taget question.  In order to produce the same results, run the FSB_Student_Geographic_Trend_Analysis.rmd file first to produce the output file that has the cleaned data.  Then run the Flexdashboard.rmd file to produce the dashaboard created.
+
+## Deliverables
+
+list of deliverables to the client and explanation of how each deliverable addresses their pains or needs. This analysis will address the pains and needs of our Client. Our client wishes analyze the geographic trends of the FSB student success data while also considering and controlling on outside factors such as salary, internships, and major. To address this our report will first clean the data. This cleaned data set is one of the products that we will provide our customers as it allows for ease in future analyses. Then this clean data will be intuitively used to create a comprehensive dashboard to address the clients specific questions.
+1. The first page will provide graphics on top placement locations from FSB students. There will be a visual dot plot map focusing on placements within the US, as well as a table of the top ten placement locations by city (including count). This will address the clients question regarding where FSB students are going.
+2. The second page of the dashboard will explore the salary differentials between states as well as the average salaries of placements within the top 10 most placed in cities. This page will address the client’s interest in exploring the salary differentials by region.
+3. The third page of the dashboard will provide tables and statistics to describe the types of jobs students are getting per region, as per our clients request. Additionally, it will provide the types of jobs by city for both NYC and Chicago.
+4. The fourth and final page of our dashboard will provide the top company employment counts for FSB students by the four cities (Chicago, Cincinnati, Cleveland and Columbus). This addresses our clients question about the top jobs by city for the “4 C’s”
